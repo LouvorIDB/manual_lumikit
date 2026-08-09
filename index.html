@@ -1,443 +1,1054 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Curso Prático de Iluminação: Lumikit</title>
+    <title>Playlists - Igreja</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .chart-container {
+        .drive-player-wrapper {
             position: relative;
             width: 100%;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 40vh;
-            min-height: 300px;
-            max-height: 450px;
+            height: 206px;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            background-color: #1e293b;
         }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #d6d3d1; border-radius: 10px; }
-        .nav-active { background-color: #fef3c7; border-left-color: #d97706; font-weight: 600; color: #b45309; }
-        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .drive-player-wrapper iframe {
+            position: absolute;
+            top: -250px;
+            left: 0;
+            width: 100%;
+            height: 706px;
+            border: 0;
+        }
+        #modal-admin { transition: opacity 0.2s; }
+        #painel-admin { transition: opacity 0.2s; }
     </style>
 </head>
-<body class="bg-stone-50 text-stone-800 flex h-screen overflow-hidden antialiased">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between">
 
-    <aside class="w-64 bg-stone-100 border-r border-stone-200 flex flex-col hidden md:flex flex-shrink-0 z-20">
-        <div class="p-6 border-b border-stone-200 bg-stone-50">
-            <h1 class="text-xl font-bold text-amber-700 tracking-tight">Lumikit Master</h1>
-            <p class="text-xs text-stone-500 mt-1 uppercase tracking-wider font-semibold">Curso de Iluminação</p>
-        </div>
-        <nav class="flex-1 overflow-y-auto custom-scrollbar py-4" id="main-nav">
-            <button data-target="mod-intro" class="w-full text-left px-6 py-3 border-l-4 border-transparent hover:bg-stone-200 transition-colors nav-active">Visão Geral</button>
-            <button data-target="mod-1" class="w-full text-left px-6 py-3 border-l-4 border-transparent hover:bg-stone-200 transition-colors">1. Fundamentos Físicos</button>
-            <button data-target="mod-2" class="w-full text-left px-6 py-3 border-l-4 border-transparent hover:bg-stone-200 transition-colors">2. Anatomia & Aparelhos</button>
-            <button data-target="mod-3" class="w-full text-left px-6 py-3 border-l-4 border-transparent hover:bg-stone-200 transition-colors">3. O Ecossistema Lumikit</button>
-            <button data-target="mod-4" class="w-full text-left px-6 py-3 border-l-4 border-transparent hover:bg-stone-200 transition-colors">4. Operação MIDI</button>
-            <button data-target="mod-5" class="w-full text-left px-6 py-3 border-l-4 border-transparent hover:bg-stone-200 transition-colors">5. Integração & Automação</button>
-            <button data-target="mod-6" class="w-full text-left px-6 py-3 border-l-4 border-transparent hover:bg-stone-200 transition-colors">6. Resolução de Problemas</button>
-        </nav>
-    </aside>
-
-    <div class="md:hidden fixed top-0 left-0 w-full bg-stone-100 border-b border-stone-200 p-4 z-30 flex justify-between items-center">
-        <h1 class="text-lg font-bold text-amber-700">Lumikit Master</h1>
-        <button id="mobile-menu-btn" class="text-stone-600 text-2xl px-2">&#9776;</button>
-    </div>
-
-    <div id="mobile-nav" class="fixed inset-0 bg-stone-800/50 z-40 hidden">
-        <div class="bg-stone-100 w-3/4 h-full shadow-xl flex flex-col">
-            <div class="p-4 border-b border-stone-200 flex justify-between items-center">
-                <span class="font-bold text-stone-800">Menu</span>
-                <button id="close-mobile-btn" class="text-2xl text-stone-500">&times;</button>
+    <!-- ===================== MODAL DE LOGIN ADMIN ===================== -->
+    <div id="modal-admin" class="hidden fixed inset-0 bg-black/70 z-[100] flex items-center justify-center">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-8 w-80 shadow-2xl space-y-4">
+            <h2 class="text-lg font-bold text-emerald-400 text-center">🔐 Acesso Admin</h2>
+            <input type="password" id="input-senha-admin" placeholder="Senha" onkeydown="if(event.key==='Enter') entrarAdmin()"
+                class="w-full bg-slate-900 border border-slate-700 px-4 py-2.5 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm">
+            <p id="erro-senha" class="text-red-400 text-xs hidden">Senha incorreta.</p>
+            <div class="flex gap-2">
+                <button onclick="fecharModalAdmin()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 py-2 rounded-lg text-sm">Cancelar</button>
+                <button onclick="entrarAdmin()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium">Entrar</button>
             </div>
-            <nav class="flex-1 overflow-y-auto" id="mobile-nav-links">
-                </nav>
         </div>
     </div>
 
-    <main class="flex-1 overflow-y-auto custom-scrollbar relative pt-16 md:pt-0 bg-white">
-        <div class="max-w-4xl mx-auto p-6 md:p-10 pb-24" id="content-container">
-
-            <section id="mod-intro" class="tab-content active">
-                <div class="mb-8">
-                    <p class="text-sm font-semibold text-amber-600 uppercase tracking-widest mb-2">Introdução</p>
-                    <h2 class="text-4xl font-extrabold text-stone-900 mb-4">A Arte da Iluminação</h2>
-                    <blockquote class="border-l-4 border-amber-500 pl-4 py-2 italic text-stone-600 bg-stone-50 rounded-r-lg text-lg">
-                        "A luz não deve ser apenas vista; ela deve ajudar a revelar a mensagem."
-                    </blockquote>
+    <!-- ===================== PAINEL ADMIN ===================== -->
+    <div id="painel-admin" class="hidden fixed inset-0 bg-slate-900 z-[90] overflow-y-auto">
+        <div class="container mx-auto px-4 py-8 max-w-4xl pb-20">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold text-emerald-400">⚙️ Painel Admin</h1>
+                    <p class="text-slate-400 text-sm mt-1">Gerencie cultos e playlists</p>
                 </div>
-                
-                <p class="text-stone-700 leading-relaxed mb-6 text-lg">
-                    Seja bem-vindo ao ambiente interativo de capacitação em iluminação cênica. Este manual foi estruturado para guiar voluntários e operadores passo a passo — partindo do zero absoluto até técnicas avançadas de programação e automação no software Lumikit.
-                </p>
-
-                <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-8 text-sm text-stone-800">
-                    <h3 class="font-bold text-amber-800 text-base mb-2">🎯 O Objetivo Deste Curso</h3>
-                    <p class="leading-relaxed">
-                        Ao término deste treinamento, a equipe estará totalmente capacitada para operar os cultos com total segurança, criar ambientes que conversem com a mensagem litúrgica de forma harmônica, diagnosticar e resolver problemas de rede no palco em minutos, e configure integrações inteligentes que reduzem a carga de trabalho braçal na cabine técnica.
-                    </p>
-                </div>
-
-                <h3 class="text-2xl font-bold text-stone-900 mt-8 mb-6 border-b border-stone-200 pb-2">Conteúdo Programático Detalhado</h3>
-                
-                <div class="space-y-6">
-                    <div class="flex gap-4 bg-stone-50 p-5 rounded-xl border border-stone-200/60 shadow-sm">
-                        <div class="text-3xl bg-white w-12 h-12 rounded-lg flex items-center justify-center border border-stone-200 shadow-inner flex-shrink-0">🔌</div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-stone-900 mb-1">Módulo 1: Fundamentos Físicos e Infraestrutura</h4>
-                            <p class="text-stone-600 text-sm mb-2">A base de tudo. Compreender a física por trás do sinal evita que o operador gaste horas caçando falhas fantasmas.</p>
-                            <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-xs text-stone-500 list-disc pl-4">
-                                <li>O que é o protocolo digital DMX 512.</li>
-                                <li>A importância da impedância de 110 &Omega;.</li>
-                                <li>Sinal Diferencial RS-485 contra ruídos.</li>
-                                <li>Infraestrutura de rede com Art-Net e Nodes.</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4 bg-stone-50 p-5 rounded-xl border border-stone-200/60 shadow-sm">
-                        <div class="text-3xl bg-white w-12 h-12 rounded-lg flex items-center justify-center border border-stone-200 shadow-inner flex-shrink-0">💡</div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-stone-900 mb-1">Módulo 2: Anatomia dos Aparelhos (Fixtures)</h4>
-                            <p class="text-stone-600 text-sm mb-2">Aprenda a mapear e entender as ferramentas de trabalho que compõem o design visual do altar.</p>
-                            <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-xs text-stone-500 list-disc pl-4">
-                                <li>Diferença entre PAR LED e tecnologia COB.</li>
-                                <li>Tipos de Moving Heads (Beam, Spot e Wash).</li>
-                                <li>Entendendo mapas de canais DMX (Profiles).</li>
-                                <li>Como funciona a mistura aditiva de cores (RGBW).</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4 bg-stone-50 p-5 rounded-xl border border-stone-200/60 shadow-sm">
-                        <div class="text-3xl bg-white w-12 h-12 rounded-lg flex items-center justify-center border border-stone-200 shadow-inner flex-shrink-0">💻</div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-stone-900 mb-1">Módulo 3: Lógica e Programação no Lumikit</h4>
-                            <p class="text-stone-600 text-sm mb-2">Dominando a arquitetura interna do software para criar programações ágeis, limpas e profissionais.</p>
-                            <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-xs text-stone-500 list-disc pl-4">
-                                <li>Montagem do Patch de aparelhos do zero.</li>
-                                <li>Regra de ouro das prioridades de janelas (LTP).</li>
-                                <li>Gravação de Cenas, Sequências e Presets.</li>
-                                <li>Gerador matemático Wizard e Avanço em graus.</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4 bg-stone-50 p-5 rounded-xl border border-stone-200/60 shadow-sm">
-                        <div class="text-3xl bg-white w-12 h-12 rounded-lg flex items-center justify-center border border-stone-200 shadow-inner flex-shrink-0">🎛️</div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-stone-900 mb-1">Módulo 4: Operação Tátil Externa (MIDI)</h4>
-                            <p class="text-stone-600 text-sm mb-2">Saia do clique do mouse. Dê vida física ao software e opere o culto no tempo e na dinâmica certa das músicas.</p>
-                            <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-xs text-stone-500 list-disc pl-4">
-                                <li>O que é o mapeamento de sinal MIDI.</li>
-                                <li>Configuração e ativação de controladoras USB.</li>
-                                <li>Uso da função "Aprender MIDI" (Learn).</li>
-                                <li>Atribuição tátil para Master Dimmer e Blackout.</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4 bg-stone-50 p-5 rounded-xl border border-stone-200/60 shadow-sm">
-                        <div class="text-3xl bg-white w-12 h-12 rounded-lg flex items-center justify-center border border-stone-200 shadow-inner flex-shrink-0">🤖</div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-stone-900 mb-1">Módulo 5: Ecossistema de Automação de Igreja</h4>
-                            <p class="text-stone-600 text-sm mb-2">Criação de um ecossistema inteligente, conectando softwares para trabalharem sozinhos a cada comando.</p>
-                            <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-xs text-stone-500 list-disc pl-4">
-                                <li>Criação de pontes virtuais com loopMIDI.</li>
-                                <li>Troca automática de cenas através de slides do Holyrics.</li>
-                                <li>Introdução aos comandos de rede por protocolo OSC.</li>
-                                <li>Macros globais de botões usando Bitfocus Companion.</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4 bg-stone-50 p-5 rounded-xl border border-stone-200/60 shadow-sm">
-                        <div class="text-3xl bg-white w-12 h-12 rounded-lg flex items-center justify-center border border-stone-200 shadow-inner flex-shrink-0">🛠️</div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-stone-900 mb-1">Módulo 6: Resolução de Problemas e Boas Práticas</h4>
-                            <p class="text-stone-600 text-sm mb-2">O guia de sobrevivência do operador. Como agir sob pressão caso o sistema falhe minutos antes do culto.</p>
-                            <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-xs text-stone-500 list-disc pl-4">
-                                <li>Diagnóstico rápido de oscilações e flickering DMX.</li>
-                                <li>Manutenção preventiva de redes IP estáticas.</li>
-                                <li>Uso correto de transições suaves (Fade) e Blackout.</li>
-                                <li>Equilíbrio de cores e temperatura para transmissões de vídeo.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="mod-1" class="tab-content">
-    <div class="mb-8">
-        <p class="text-sm font-semibold text-amber-600 uppercase tracking-widest mb-2">Módulo 1</p>
-        <h2 class="text-3xl font-extrabold text-stone-900">Fundamentos Físicos e Sinal</h2>
-    </div>
-
-    <p class="text-stone-700 leading-relaxed mb-8 text-lg">
-        Para operar qualquer software de iluminação, precisamos entender como a informação viaja do computador até o refletor lá no palco. Esta seção desmistifica a transmissão serial, a anatomia e montagem dos cabos, e a infraestrutura de rede digital imune a ruídos.
-    </p>
-
-    <h3 class="text-2xl font-bold text-stone-800 mt-10 mb-4 border-b pb-2">Como 512 Canais Passam por um Único Cabo?</h3>
-    <p class="text-stone-700 mb-4 leading-relaxed">
-        O segredo do DMX512 para enviar informações de até 512 aparelhos diferentes por apenas um par de fios é uma técnica chamada <strong>Multiplexagem por Divisão de Tempo (TDM)</strong>. Em vez de enviar todos os canais ao mesmo tempo, os dados são transmitidos de forma <strong>serial</strong> (um bit atrás do outro) em uma velocidade altíssima de <strong>250 kbps</strong> (250.000 bits por segundo).
-    </p>
-    
-    <div class="bg-amber-50 border border-amber-200 p-5 rounded-xl mb-8 text-sm text-stone-800 leading-relaxed">
-        <h4 class="font-bold text-amber-900 mb-2">⏱️ A Linha de Produção Temporal (O Pacote DMX)</h4>
-        <p class="mb-3">O fluxo contínuo de dados funciona como uma esteira que envia pacotes idênticos cerca de 44 vezes por segundo. Cada pacote segue uma estrutura matemática rígida no tempo:</p>
-        <ol class="list-decimal pl-5 space-y-1 text-stone-700">
-            <li><strong>MAB / Break:</strong> Um pulso longo de reset que avisa todos os refletores: <em>"Atenção, um novo pacote vai começar!"</em>.</li>
-            <li><strong>Start Code (Canal 0):</strong> Um byte de controle (geralmente com valor 0) para alinhar os microcontroladores.</li>
-            <li><strong>Os Apartamentos de Dados:</strong> O Lumikit envia sequencialmente o valor do Canal 1, depois o Canal 2, depois o Canal 3... até o Canal 512. Cada canal tem uma janela de tempo exata para passar o seu valor (de 0 a 255).</li>
-        </ol>
-        <p class="mt-3 font-semibold text-amber-800">Cada refletor fica "contando" os bytes na linha. Se o seu patch foi configurado no endereço 9, o aparelho ignora os 8 primeiros bytes e captura exatamente o 9º byte que passa pelo cabo.</p>
-    </div>
-
-    <div class="bg-blue-50 p-6 rounded-xl border border-blue-100 mb-8">
-        <h4 class="font-bold text-blue-800 text-lg mb-2">🏢 A Metáfora do Prédio</h4>
-        <p class="text-blue-900 text-sm leading-relaxed mb-4">Pense num Universo DMX como um prédio de 512 apartamentos. Cada aparelho (fixture) aluga apartamentos consecutivos. Se um refletor precisa de 8 canais e começa no endereço 1, ele ocupa os apartamentos 1 a 8. O próximo só pode alugar a partir do 9.</p>
-        <div class="flex flex-wrap gap-2">
-            <div class="px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded">Apto 1-8: Refletor A</div>
-            <div class="px-3 py-1 bg-amber-500 text-white text-xs font-bold rounded">Apto 9-16: Refletor B</div>
-            <div class="px-3 py-1 bg-stone-300 text-stone-600 text-xs font-bold rounded">Apto 17... (Livres)</div>
-        </div>
-    </div>
-
-    <!-- Cabeamento, Montagem e Impedância com Ambas as Imagens -->
-    <h3 class="text-2xl font-bold text-stone-800 mt-10 mb-4 border-b pb-2">Anatomia do Cabo, Montagem e Casamento de Impedância</h3>
-    <p class="text-stone-700 mb-6 leading-relaxed">
-        Embora os conectores DMX mais comuns sejam os XLR de 3 pinos (idênticos aos de microfone), <strong>nunca utilize cabos de áudio comuns para DMX</strong>. O sinal DMX trabalha em alta frequência e exige um cabo blindado especial com <strong>impedância de 110 &Omega;</strong>. Cabos de microfone comuns possuem cerca de 75 &Omega;, o que causa o terrível "flickering" (luzes piscando sozinhas devido ao sinal batendo no fim da linha e voltando em forma de eco).
-    </p>
-
-    <!-- Seção de Montagem e Fotos Reais -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        
-        <!-- Coluna 1: Guia de Soldagem XLR -->
-        <div class="border border-stone-200 rounded-xl p-5 bg-stone-50 flex flex-col justify-between">
+                <button onclick="sairAdmin()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 py-2 rounded-lg text-sm">← Voltar ao site</button>
+            </div>
+            <div class="flex gap-3 mb-6 flex-wrap">
+                <button onclick="mostrarFormCulto(null)" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-medium text-sm">+ Novo Culto</button>
+                <button onclick="moverMusicasNovasParaBanco()" id="btn-mover-novas" class="bg-violet-600 hover:bg-violet-500 text-white px-5 py-2.5 rounded-xl font-medium text-sm">🌟 Mover Músicas Novas → Banco</button>
+            </div>
+            <div id="status-mover-novas" class="hidden mb-6 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-emerald-400"></div>
             <div>
-                <h4 class="font-bold text-stone-900 mb-3 flex items-center gap-2">🛠️ Guia de Soldagem: Conector XLR (3 pinos)</h4>
-                <table class="w-full text-sm text-left border-collapse mb-4">
-                    <thead>
-                        <tr class="border-b border-stone-300 text-stone-500 text-xs uppercase">
-                            <th class="py-2">Pino</th>
-                            <th class="py-2">Função</th>
-                            <th class="py-2">Fio Correto</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-stone-700 font-mono text-xs">
-                        <tr class="border-b border-stone-200">
-                            <td class="py-2 font-bold text-stone-900">Pino 1</td>
-                            <td class="py-2">GND (Terra)</td>
-                            <td class="py-2 text-stone-500">Malha / Blindagem</td>
-                        </tr>
-                        <tr class="border-b border-stone-200">
-                            <td class="py-2 font-bold text-blue-600">Pino 2</td>
-                            <td class="py-2">Data - (Invertido)</td>
-                            <td class="py-2 text-blue-600">Fio Branco (ou Azul)</td>
-                        </tr>
-                        <tr>
-                            <td class="py-2 font-bold text-red-600">Pino 3</td>
-                            <td class="py-2">Data + (Original)</td>
-                            <td class="py-2 text-red-600">Fio Vermelho</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="mt-2">
-                <p class="text-xs font-semibold text-stone-500 mb-2 uppercase tracking-wider">📸 Referência Visual do Conector:</p>
-                <img src="img/CABO SOLDADO.jpg" alt="Esquema do Cabo Soldado XLR" class="rounded-lg shadow-md max-w-full h-auto border border-stone-200 mx-auto">
-            </div>
-        </div>
-
-        <!-- Coluna 2: O Terminador DMX -->
-        <div class="border border-stone-200 rounded-xl p-5 bg-stone-50 flex flex-col justify-between">
-            <div>
-                <h4 class="font-bold text-stone-900 mb-2 flex items-center gap-2">🛑 O Terminador DMX (Obrigatório)</h4>
-                <p class="text-xs text-stone-600 leading-relaxed mb-3">
-                    No último aparelho da sua fita DMX, você deve plugar um terminador na saída XLR. Ele absorve a energia do sinal, impedindo reflexões indesejadas.
-                </p>
-                
-                <div class="bg-stone-800 text-amber-500 font-mono text-xs p-3 rounded-lg border border-stone-700 mb-4">
-                    <strong>Como montar um terminador:</strong><br>
-                    Pegue um conector XLR Macho sobressalente e solde um resistor de <strong>120 &Omega; (1/4W)</strong> conectando diretamente os <strong>Pinos 2 e 3</strong>. Feche o conector e plugue no fim da linha!
+                <h2 class="text-base font-semibold text-slate-300 mb-3">Cultos na planilha</h2>
+                <div id="admin-lista-cultos" class="space-y-2">
+                    <p class="text-slate-500 text-sm">Carregando...</p>
                 </div>
             </div>
-            
-            <div class="mt-2">
-                <p class="text-xs font-semibold text-stone-500 mb-2 uppercase tracking-wider">📸 Referência Visual do Terminador:</p>
-                <img src="img/TERMINADOR DMX.jpg" alt="Exemplo de Montagem do Terminador DMX" class="rounded-lg shadow-md max-w-full h-auto border border-stone-200 mx-auto">
+        </div>
+    </div>
+
+    <!-- ===================== MODAL DE EDIÇÃO DE CULTO ===================== -->
+    <div id="modal-culto" class="hidden fixed inset-0 bg-black/70 z-[100] flex items-start justify-center overflow-y-auto py-8 px-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-2xl shadow-2xl space-y-5 p-6">
+
+            <h2 id="modal-culto-titulo" class="text-lg font-bold text-emerald-400">Novo Culto</h2>
+
+            <!-- Dados básicos -->
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-xs text-slate-400 mb-1 block">Data (dd/mm)</label>
+                    <input type="text" id="culto-data" placeholder="Ex: 18/07"
+                        class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-lg text-sm text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 mb-1 block">Tipo do Culto</label>
+                    <select id="culto-tipo" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-lg text-sm text-white focus:outline-none focus:border-emerald-500">
+                        <option value="DOMINGO">DOMINGO</option>
+                        <option value="SABADO">SABADO</option>
+                        <option value="QUARTA">QUARTA</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="culto-em-montagem" class="w-4 h-4 accent-red-500">
+                    <label for="culto-em-montagem" class="text-sm text-slate-300">Marcar como "EM MONTAGEM"</label>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="culto-oculto" class="w-4 h-4 accent-slate-500">
+                    <label for="culto-oculto" class="text-sm text-slate-300">Ocultar da visualização geral</label>
+                </div>
+            </div>
+
+            <!-- ===== ESCALA DE INSTRUMENTISTAS ===== -->
+            <div class="border border-slate-700 rounded-xl p-4 space-y-3 bg-slate-900/40">
+                <h3 class="text-sm font-semibold text-slate-300">🎼 Escala de Instrumentistas</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="text-xs text-slate-400 mb-1 block">🎸 Violão</label>
+                        <select id="escala-violao" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-lg text-sm text-white focus:outline-none focus:border-emerald-500">
+                            <option value="">— Nenhum —</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400 mb-1 block">🥁 Bateria</label>
+                        <select id="escala-bateria" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-lg text-sm text-white focus:outline-none focus:border-emerald-500">
+                            <option value="">— Nenhum —</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400 mb-1 block">🎹 Teclado</label>
+                        <select id="escala-teclado" class="w-full bg-slate-900 border border-slate-700 px-3 py-2 rounded-lg text-sm text-white focus:outline-none focus:border-emerald-500">
+                            <option value="">— Nenhum —</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ESCALA DE CANTORES DO CULTO ===== -->
+            <div class="border border-slate-700 rounded-xl p-4 space-y-2 bg-slate-900/40">
+                <h3 class="text-sm font-semibold text-slate-300">🎤 Cantores do Culto</h3>
+                <p class="text-xs text-slate-500">Selecione quem vai cantar neste culto (depois você escolhe por música).</p>
+                <div id="culto-cantores-lista" class="flex flex-wrap gap-2 min-h-[30px]">
+                    <p class="text-slate-500 text-xs">Carregando cantores...</p>
+                </div>
+            </div>
+
+            <!-- ===== MÚSICAS DA PLAYLIST ===== -->
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-sm font-semibold text-slate-300">Músicas da Playlist</h3>
+                    <button onclick="abrirSeletorMusica()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg text-xs">+ Adicionar Música</button>
+                </div>
+                <div id="culto-musicas-lista" class="space-y-2 min-h-[40px]">
+                    <p class="text-slate-500 text-xs">Nenhuma música adicionada.</p>
+                </div>
+            </div>
+
+            <!-- Seletor de músicas do banco -->
+            <div id="seletor-musica" class="hidden border border-slate-700 rounded-xl bg-slate-900 p-3 space-y-2">
+                <input type="text" id="busca-banco" placeholder="Buscar no banco de músicas..." onkeyup="filtrarBanco()"
+                    class="w-full bg-slate-800 border border-slate-700 px-3 py-2 rounded-lg text-sm text-white focus:outline-none focus:border-emerald-500">
+                <div id="resultado-banco" class="space-y-1 max-h-48 overflow-y-auto"></div>
+            </div>
+
+            <!-- Ações -->
+            <div class="flex gap-3 pt-2">
+                <button onclick="fecharModalCulto()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 py-2.5 rounded-lg text-sm">Cancelar</button>
+                <button onclick="salvarCulto()" id="btn-salvar-culto" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-lg text-sm font-medium">Salvar na Planilha</button>
+            </div>
+            <p id="status-salvar-culto" class="text-xs text-center text-emerald-400 hidden">Salvo com sucesso! Recarregue o site para ver as mudanças.</p>
+            <p id="erro-salvar-culto" class="text-xs text-center text-red-400 hidden">Erro ao salvar. Tente novamente.</p>
+        </div>
+    </div>
+
+    <!-- ===================== SITE PRINCIPAL ===================== -->
+    <div class="container mx-auto px-4 py-8 max-w-4xl pb-60">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-emerald-400" id="titulo-site">Repertório</h1>
+            <p class="text-slate-400 text-sm mt-1">Organizem-se previamente para os ensaios e cultos.</p>
+
+            <div class="flex justify-center gap-3 mt-6 flex-wrap">
+                <button onclick="mudarAba('cultos')" id="btn-cultos" class="px-5 py-2.5 rounded-xl font-medium text-sm transition bg-emerald-600 text-white shadow-lg">
+                    📅 Próximos Cultos
+                </button>
+                <button onclick="mudarAba('repertorio')" id="btn-repertorio" class="px-5 py-2.5 rounded-xl font-medium text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700">
+                    🎵 Lista Geral de Músicas
+                </button>
+                <button onclick="mudarAba('novas')" id="btn-novas" class="px-5 py-2.5 rounded-xl font-medium text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700">
+                    🌟 Músicas Novas
+                </button>
+            </div>
+
+            <div class="flex justify-center mt-3">
+                <button onclick="toggleComentario('form-sugestao-nova')" class="px-4 py-2 rounded-xl font-medium text-sm transition bg-slate-700 hover:bg-slate-600 text-slate-300">
+                    💡 Sugerir Música Nova
+                </button>
+            </div>
+
+            <div id="form-sugestao-nova" class="hidden mt-4 bg-slate-800 border border-slate-700 rounded-2xl p-4 max-w-lg mx-auto space-y-2">
+                <p class="text-sm text-slate-300 font-medium">Sugerir música para o repertório geral:</p>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="sugestao-nova-autor" placeholder="Seu nome" class="sm:w-1/3 bg-slate-900 border border-slate-700 px-3 py-2 rounded text-sm text-white focus:outline-none focus:border-emerald-500">
+                    <input type="text" id="sugestao-nova-texto" placeholder="Nome da música e artista" class="sm:w-2/3 bg-slate-900 border border-slate-700 px-3 py-2 rounded text-sm text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <button onclick="enviarComentario('Repertório Geral', 'sugestao-nova-autor', 'sugestao-nova-texto', 'sugestao-nova-status', 'Sugestão de Música Nova')" class="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded text-sm font-medium">Enviar sugestão</button>
+                <p id="sugestao-nova-status" class="text-xs text-emerald-400 hidden">Sugestão enviada!</p>
+            </div>
+
+            <div id="btn-admin-wrapper" class="hidden mt-4">
+                <button onclick="abrirModalAdmin()" class="text-xs text-slate-600 hover:text-slate-400 transition">⚙ Admin</button>
+            </div>
+        </header>
+
+        <div id="secao-cultos" class="space-y-6">
+            <div class="text-center text-slate-500 py-10">Carregando playlists de cultos...</div>
+        </div>
+
+        <!-- ABA 3: MÚSICAS NOVAS -->
+        <div id="secao-novas" class="hidden space-y-4">
+            <div class="bg-slate-800/60 border border-emerald-700/40 rounded-2xl p-4 mb-4">
+                <p class="text-emerald-300 text-sm font-medium">🌟 Músicas que estamos aprendendo para o próximo mês</p>
+                <p class="text-slate-400 text-xs mt-1">Ouça, estude os tons e prepare-se!</p>
+            </div>
+            <div id="novasList" class="space-y-4">
+                <div class="text-center text-slate-500 py-10">Carregando músicas novas...</div>
             </div>
         </div>
-        
-    </div>
-                <h3 class="text-2xl font-bold text-stone-800 mt-10 mb-4 border-b pb-2">A Mágica do Sinal Diferencial (RS-485)</h3>
-    <p class="text-stone-700 mb-4">O DMX trafega em cabos balanceados. Para evitar que motores de moving heads e cabos de energia de alta potência no palco gerem ruídos magnéticos nas luzes, o sistema envia o sinal duplicado e espelhado. Veja no simulador matemático abaixo como a subtração anula o ruído.</p>
 
-    <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 mb-8 shadow-inner">
-        <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-            <span class="text-sm font-semibold text-stone-600">Simulador de Transmissão RS-485</span>
-            <div class="flex items-center gap-2">
-                <label class="text-xs font-bold text-stone-500">Intensidade do Ruído Elétrico:</label>
-                <input type="range" id="noiseSlider" min="0" max="100" value="50" class="w-32 accent-amber-600">
+        <div id="secao-repertorio" class="hidden space-y-4">
+            <div class="mb-6">
+                <input type="text" id="searchInput" placeholder="Pesquisar música no repertório geral..." onkeyup="filtrarMusicas()"
+                    class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-emerald-500">
+            </div>
+            <div id="musicList" class="space-y-4">
+                <div class="text-center text-slate-500 py-10">Carregando repertório...</div>
             </div>
         </div>
-        <div class="chart-container">
-            <canvas id="rs485Chart"></canvas>
-        </div>
-        <p class="text-xs text-center text-stone-500 mt-4">O "Sinal Original (Pino 3)" e "Sinal Invertido (Pino 2)" sofrem a mesma interferência. A "Subtração (Pino3 - Pino2)" dobra o sinal limpo e anula o ruído (Ruído - Ruído = 0).</p>
     </div>
 
-    <h3 class="text-2xl font-bold text-stone-800 mt-10 mb-4 border-b pb-2">Aprofundamento Técnico em Art-Net</h3>
-    <p class="text-stone-700 mb-4 leading-relaxed">
-        Passar dezenas de cabos XLR individuais da cabine técnica até as treliças do palco tornou-se inviável. O <strong>Art-Net</strong> é um protocolo royalty-free desenvolvido pela Artistic Licence que encapsula pacotes inteiros de dados DMX512 dentro de frames de rede **UDP/IP Ethernet padrão** (porta 6454).
-    </p>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div class="bg-stone-50 p-4 border border-stone-200 rounded-xl">
-            <span class="text-xl block mb-1">🚀 Velocidade Absoluta</span>
-            <p class="text-xs text-stone-600 leading-relaxed">Enquanto um cabo de DMX comum aguenta apenas 1 Universo de 512 canais, um único cabo de rede de categoria Cat5e/Cat6 trafega facilmente dezenas de milhares de universos simultâneos.</p>
-        </div>
-        <div class="bg-stone-50 p-4 border border-stone-200 rounded-xl">
-            <span class="text-xl block mb-1">🔢 Sub-redes e Universos</span>
-            <p class="text-xs text-stone-600 leading-relaxed">O Art-Net mapeia os dados em 128 Net-Subnets e Universos. No Lumikit, configuramos o IP do computador na mesma faixa do Node para mapear o envio perfeitamente.</p>
-        </div>
-        <div class="bg-stone-50 p-4 border border-stone-200 rounded-xl">
-            <span class="text-xl block mb-1">📟 O papel do Node Art-Net</span>
-            <p class="text-xs text-stone-600 leading-relaxed">O Node funciona como um tradutor eletrônico no palco. Ele recebe os cabos de rede vindos do Lumikit, lê os pacotes IP e "descompacta" as saídas em portas XLR físicas para os refletores.</p>
+    <!-- Rodapé Fixo -->
+    <div class="bg-slate-800 border-t border-slate-700 px-6 py-5 fixed bottom-0 left-0 right-0 shadow-2xl z-50">
+        <div class="container mx-auto max-w-4xl flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="text-center md:text-left w-full md:w-1/3">
+                <span id="nowPlayingTitle" class="text-xs md:text-sm font-semibold text-emerald-300 block truncate">Nenhuma música selecionada</span>
+            </div>
+            <div id="playerContainer" class="w-full md:w-2/3 flex justify-center items-center">
+                <span class="text-xs text-slate-400">Clique em "▶ Ouvir VS" para carregar o player.</span>
+            </div>
         </div>
     </div>
-
-    <div class="flex flex-wrap items-center gap-4 bg-stone-100 p-4 rounded-lg text-sm text-stone-700">
-        <span class="text-2xl">💻</span>
-        <span>Computador (Lumikit)</span>
-        <span class="font-bold text-amber-600">&rarr; Cabo RJ45 (Rede Ethernet IP) &rarr;</span>
-        <span class="text-2xl">📟</span>
-        <span>Node Art-Net (Conversor de Palco)</span>
-        <span class="font-bold text-amber-600">&rarr; Cabo XLR (Físico 110 &Omega;) &rarr;</span>
-        <span class="text-2xl">💡</span>
-        <span>Aparelhos</span>
-    </div>
-</section>
-        </div>
-    </main>
 
     <script>
-        let rs485ChartInstance = null;
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzY7ME_zU4avoz3cyswfP1INGxyaJuMDAHxCyZtDHnLuItqNE_YhtKgYBYmO_1YJdMH/exec";
+        const SENHA_ADMIN = "idblouvor";
 
-        // Gerenciamento de abas e navegação do menu lateral
-        function switchTab(targetId) {
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-                if(content.id === targetId) content.classList.add('active');
-            });
-            
-            document.querySelectorAll('#main-nav button, #mobile-nav-links button').forEach(btn => {
-                btn.classList.remove('nav-active');
-                if(btn.dataset.target === targetId) btn.classList.add('nav-active');
-            });
-            
-            document.getElementById('mobile-nav').classList.add('hidden');
-            
-            // Re-forçar atualização do gráfico caso mude para o módulo 1
-            if(targetId === 'mod-1' && rs485ChartInstance) {
-                rs485ChartInstance.update();
-            }
-            
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        }
+        let dadosGlobais = { cultos: [], repertorio: [], banco: [], cantores: [] };
+        let musicasCultoAtual = [];
+        let cantoresCultoAtual = []; // cantores selecionados para cantar no culto
+        let escalaInstrumentos = { violao: '', bateria: '', teclado: '' };
+        let cultoEditandoIndex = null;
+        let isAdmin = false;
 
-        // Configuração de carregamento inicial
+        // ===================== INICIALIZAÇÃO =====================
+
         window.addEventListener('DOMContentLoaded', () => {
-            // Inicializar o simulador gráfico do Módulo 1
-            initRS485Chart();
-
-            // Inicializar clonagem do menu para versão Mobile
-            const mobileNavLinks = document.getElementById('mobile-nav-links');
-            document.querySelectorAll('#main-nav button').forEach(btn => {
-                const clone = btn.cloneNode(true);
-                clone.className = 'w-full text-left px-6 py-4 border-b border-stone-200 hover:bg-stone-200 transition-colors block';
-                clone.addEventListener('click', () => switchTab(clone.dataset.target));
-                mobileNavLinks.appendChild(clone);
-            });
-
-            document.querySelectorAll('#main-nav button').forEach(btn => {
-                btn.addEventListener('click', () => switchTab(btn.dataset.target));
-            });
-
-            document.getElementById('mobile-menu-btn').addEventListener('click', () => {
-                document.getElementById('mobile-nav').classList.remove('hidden');
-            });
-            document.getElementById('close-mobile-btn').addEventListener('click', () => {
-                document.getElementById('mobile-nav').classList.add('hidden');
-            });
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('admin') === 'true') {
+                document.getElementById('btn-admin-wrapper').classList.remove('hidden');
+            }
+            carregarDados();
         });
 
-        // Função do Módulo 1: Inicialização e atualização do Gráfico RS-485
-        function initRS485Chart() {
-            const canvasElement = document.getElementById('rs485Chart');
-            if (!canvasElement) return;
-            
-            const ctx = canvasElement.getContext('2d');
-            const noiseSlider = document.getElementById('noiseSlider');
-            
-            const generateData = (noiseLevel) => {
-                let labels = [];
-                let dataPlus = [];
-                let dataMinus = [];
-                let dataResult = [];
-                for(let i=0; i<=50; i++) {
-                    labels.push(i);
-                    let baseSignal = Math.sin(i * 0.5) * 10;
-                    let noise = (Math.random() - 0.5) * (noiseLevel / 100) * 15;
-                    dataPlus.push(baseSignal + noise);
-                    dataMinus.push(-baseSignal + noise);
-                    dataResult.push((baseSignal + noise) - (-baseSignal + noise));
-                }
-                return {labels, dataPlus, dataMinus, dataResult};
-            };
+        async function carregarDados() {
+            try {
+                const response = await fetch(WEB_APP_URL);
+                const data = await response.json();
+                dadosGlobais.cultos = data.cultos || [];
+                dadosGlobais.repertorio = data.repertorio || [];
+                dadosGlobais.banco = data.banco || [];
+                dadosGlobais.cantores = data.cantores || [];
+                dadosGlobais.novas = data.novas || [];
 
-            const initialData = generateData(50);
+                renderizarCultos(dadosGlobais.cultos);
+                renderizarRepertorio(dadosGlobais.repertorio);
+                renderizarMusicasNovas(dadosGlobais.novas);
+                if (isAdmin) renderizarAdminListaCultos();
+            } catch (error) {
+                console.error("Erro ao carregar dados:", error);
+                document.getElementById('secao-cultos').innerHTML = '<p class="text-red-400 text-center">Erro ao conectar com a planilha.</p>';
+            }
+        }
 
-            rs485ChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: initialData.labels,
-                    datasets: [
-                        { label: 'Sinal Original (Pino 3)', data: initialData.dataPlus, borderColor: '#3b82f6', borderWidth: 2, tension: 0.4, pointRadius: 0 },
-                        { label: 'Sinal Invertido (Pino 2)', data: initialData.dataMinus, borderColor: '#ef4444', borderWidth: 2, tension: 0.4, pointRadius: 0 },
-                        { label: 'Subtração Limpa (Pino 3 - 2)', data: initialData.dataResult, borderColor: '#10b981', borderWidth: 4, tension: 0.4, pointRadius: 0, borderDash: [5, 5] }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: { duration: 0 },
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
-                        tooltip: { enabled: false }
-                    },
-                    scales: {
-                        x: { display: false },
-                        y: { min: -25, max: 25, grid: { color: '#f5f5f4' } }
-                    }
-                }
-            });
+        // ===================== HELPERS DE CANTORES/INSTRUMENTOS =====================
 
-            noiseSlider.addEventListener('input', (e) => {
-                const newData = generateData(e.target.value);
-                rs485ChartInstance.data.datasets[0].data = newData.dataPlus;
-                rs485ChartInstance.data.datasets[1].data = newData.dataMinus;
-                rs485ChartInstance.data.datasets[2].data = newData.dataResult;
-                rs485ChartInstance.update();
+        // Retorna lista de nomes que têm o instrumento na coluna C
+        function cantoiresPorInstrumento(instrumento) {
+            return dadosGlobais.cantores.slice(1)
+                .filter(row => {
+                    const instrumentos = (row[2] || '').toString().split(',').map(s => s.trim().toLowerCase());
+                    return instrumentos.includes(instrumento.toLowerCase());
+                })
+                .map(row => row[0] ? row[0].toString().trim() : '')
+                .filter(Boolean);
+        }
+
+        // Popula um <select> com a lista de nomes, mantendo o valor selecionado
+        function popularSelect(idSelect, nomes, valorAtual) {
+            const sel = document.getElementById(idSelect);
+            sel.innerHTML = '<option value="">— Nenhum —</option>';
+            nomes.forEach(nome => {
+                const opt = document.createElement('option');
+                opt.value = nome;
+                opt.textContent = nome;
+                if (nome === valorAtual) opt.selected = true;
+                sel.appendChild(opt);
             });
         }
+
+        // ===================== ADMIN: LOGIN =====================
+
+        function abrirModalAdmin() {
+            document.getElementById('modal-admin').classList.remove('hidden');
+            document.getElementById('input-senha-admin').value = '';
+            document.getElementById('erro-senha').classList.add('hidden');
+            setTimeout(() => document.getElementById('input-senha-admin').focus(), 100);
+        }
+
+        function fecharModalAdmin() {
+            document.getElementById('modal-admin').classList.add('hidden');
+        }
+
+        function entrarAdmin() {
+            const senha = document.getElementById('input-senha-admin').value;
+            if (senha === SENHA_ADMIN) {
+                isAdmin = true;
+                fecharModalAdmin();
+                abrirPainelAdmin();
+            } else {
+                document.getElementById('erro-senha').classList.remove('hidden');
+            }
+        }
+
+        function sairAdmin() {
+            isAdmin = false;
+            document.getElementById('painel-admin').classList.add('hidden');
+        }
+
+        // ===================== ADMIN: PAINEL =====================
+
+        function abrirPainelAdmin() {
+            document.getElementById('painel-admin').classList.remove('hidden');
+            renderizarAdminListaCultos();
+        }
+
+        function renderizarAdminListaCultos() {
+            const container = document.getElementById('admin-lista-cultos');
+            const rows = dadosGlobais.cultos;
+            let html = '';
+            let blocos = [];
+            let blocoAtual = null;
+            let blocoIndex = null;
+
+            for (let i = 0; i < rows.length; i++) {
+                const texto = rows[i][0] ? rows[i][0].toString() : '';
+                if (texto.includes("CULTO DE")) {
+                    if (blocoAtual !== null) blocos.push({ titulo: blocoAtual, startIndex: blocoIndex });
+                    blocoAtual = texto;
+                    blocoIndex = i;
+                }
+            }
+            if (blocoAtual !== null) blocos.push({ titulo: blocoAtual, startIndex: blocoIndex });
+
+            if (blocos.length === 0) {
+                container.innerHTML = '<p class="text-slate-500 text-sm">Nenhum culto encontrado na planilha.</p>';
+                return;
+            }
+
+            blocos.forEach((bloco) => {
+                const emMontagem = bloco.titulo.toUpperCase().includes('EM MONTAGEM');
+                const oculto = bloco.titulo.toUpperCase().includes('OCULTO');
+                const cor = oculto ? 'border-slate-700 bg-slate-800/30 opacity-60'
+                    : (emMontagem ? 'border-red-700/50 bg-red-900/20' : 'border-slate-700 bg-slate-800/60');
+                const corTexto = oculto ? 'text-slate-400' : (emMontagem ? 'text-red-300' : 'text-emerald-300');
+                const tituloExibicao = bloco.titulo.replace(/ - OCULTO/i, '').trim();
+                html += `
+                    <div class="flex items-center justify-between px-4 py-3 rounded-xl border ${cor} gap-3">
+                        <span class="text-sm font-semibold ${corTexto} uppercase">${tituloExibicao}${oculto ? ' 🙈' : ''}</span>
+                        <div class="flex gap-2 shrink-0">
+                            <button onclick="toggleOcultoCulto(${bloco.startIndex})" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg text-xs transition">${oculto ? '👁️ Mostrar' : '🙈 Ocultar'}</button>
+                            <button onclick="editarCulto(${bloco.startIndex})" class="bg-slate-700 hover:bg-emerald-700 text-slate-200 hover:text-white px-3 py-1.5 rounded-lg text-xs transition">✏️ Editar</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ===================== ADMIN: CRIAR / EDITAR CULTO =====================
+
+        function mostrarFormCulto(startIndex) {
+            cultoEditandoIndex = startIndex;
+            musicasCultoAtual = [];
+            cantoresCultoAtual = [];
+            escalaInstrumentos = { violao: '', bateria: '', teclado: '' };
+
+            document.getElementById('status-salvar-culto').classList.add('hidden');
+            document.getElementById('erro-salvar-culto').classList.add('hidden');
+
+            if (startIndex === null) {
+                document.getElementById('modal-culto-titulo').textContent = 'Novo Culto';
+                document.getElementById('culto-data').value = '';
+                document.getElementById('culto-tipo').value = 'DOMINGO';
+                document.getElementById('culto-em-montagem').checked = false;
+                document.getElementById('culto-oculto').checked = false;
+            } else {
+                const rows = dadosGlobais.cultos;
+                const tituloCulto = rows[startIndex][0].toString();
+                document.getElementById('modal-culto-titulo').textContent = 'Editar Culto';
+                document.getElementById('culto-em-montagem').checked = tituloCulto.toUpperCase().includes('EM MONTAGEM');
+                document.getElementById('culto-oculto').checked = tituloCulto.toUpperCase().includes('OCULTO');
+
+                const partes = tituloCulto.split(' - ');
+                document.getElementById('culto-data').value = partes[0] || '';
+                if (tituloCulto.includes('DOMINGO')) document.getElementById('culto-tipo').value = 'DOMINGO';
+                else if (tituloCulto.includes('SABADO')) document.getElementById('culto-tipo').value = 'SABADO';
+                else if (tituloCulto.includes('QUARTA')) document.getElementById('culto-tipo').value = 'QUARTA';
+
+                // Lê coluna F: instrumentos (JSON) e coluna G: cantores do culto
+                try {
+                    const colF = rows[startIndex][5] ? rows[startIndex][5].toString() : '{}';
+                    escalaInstrumentos = JSON.parse(colF);
+                } catch(e) { escalaInstrumentos = { violao: '', bateria: '', teclado: '' }; }
+
+                const colG = rows[startIndex][6] ? rows[startIndex][6].toString() : '';
+                cantoresCultoAtual = colG ? colG.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+                // Carrega músicas (colunas A-G de cada linha, sendo G os cantores da música)
+                for (let i = startIndex + 1; i < rows.length; i++) {
+                    const texto = rows[i][0] ? rows[i][0].toString() : '';
+                    if (texto.includes("CULTO DE")) break;
+                    if (texto.trim() === '') continue;
+                    musicasCultoAtual.push({
+                        nome: rows[i][0] || '',
+                        tom: rows[i][1] || '',
+                        variacao: rows[i][2] || 'Original',
+                        vs: rows[i][3] || '',
+                        yt: rows[i][4] || '',
+                        cantores: rows[i][6] ? rows[i][6].toString().split(',').map(s => s.trim()).filter(Boolean) : []
+                    });
+                }
+            }
+
+            popularSelectsInstrumentos();
+            renderizarCantoresCulto();
+            renderizarMusicasCulto();
+            document.getElementById('seletor-musica').classList.add('hidden');
+            document.getElementById('modal-culto').classList.remove('hidden');
+        }
+
+        function editarCulto(startIndex) { mostrarFormCulto(startIndex); }
+
+        async function toggleOcultoCulto(startIndex) {
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST', mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ acao: 'toggleOculto', startIndex })
+                });
+                await carregarDados();
+            } catch (err) { alert('Erro ao alternar a visibilidade do culto.'); }
+        }
+
+        function fecharModalCulto() {
+            document.getElementById('modal-culto').classList.add('hidden');
+        }
+
+        // ===================== ADMIN: INSTRUMENTISTAS =====================
+
+        function popularSelectsInstrumentos() {
+            popularSelect('escala-violao', cantoiresPorInstrumento('Violão'), escalaInstrumentos.violao || '');
+            popularSelect('escala-bateria', cantoiresPorInstrumento('Bateria'), escalaInstrumentos.bateria || '');
+            popularSelect('escala-teclado', cantoiresPorInstrumento('Teclado'), escalaInstrumentos.teclado || '');
+        }
+
+        // ===================== ADMIN: CANTORES DO CULTO =====================
+
+        function renderizarCantoresCulto() {
+            const container = document.getElementById('culto-cantores-lista');
+            const lista = cantoiresPorInstrumento('Cantor');
+
+            if (lista.length === 0) {
+                container.innerHTML = '<p class="text-slate-500 text-xs">Nenhum cantor cadastrado na aba Cantores com instrumento "Cantor".</p>';
+                return;
+            }
+
+            container.innerHTML = lista.map(nome => {
+                const ativo = cantoresCultoAtual.includes(nome);
+                const cls = ativo
+                    ? 'bg-emerald-600 text-white border-emerald-500'
+                    : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-slate-500';
+                return `<button type="button" onclick="toggleCantorCulto('${nome.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-full text-xs font-medium border transition ${cls}">${ativo ? '✓ ' : ''}${nome}</button>`;
+            }).join('');
+        }
+
+        function toggleCantorCulto(nome) {
+            const idx = cantoresCultoAtual.indexOf(nome);
+            if (idx === -1) cantoresCultoAtual.push(nome);
+            else cantoresCultoAtual.splice(idx, 1);
+            renderizarCantoresCulto();
+            renderizarMusicasCulto(); // atualiza seletores de cantor por música
+        }
+
+        // ===================== ADMIN: MÚSICAS =====================
+
+        function renderizarMusicasCulto() {
+            const container = document.getElementById('culto-musicas-lista');
+            if (musicasCultoAtual.length === 0) {
+                container.innerHTML = '<p class="text-slate-500 text-xs">Nenhuma música adicionada.</p>';
+                return;
+            }
+
+            container.innerHTML = musicasCultoAtual.map((m, idx) => {
+                // Seletor de cantores por música (multi — chips clicáveis)
+                const cantoresChips = cantoresCultoAtual.length === 0
+                    ? '<span class="text-slate-600 text-xs">Selecione cantores do culto primeiro</span>'
+                    : cantoresCultoAtual.map(nome => {
+                        const ativo = (m.cantores || []).includes(nome);
+                        const cls = ativo
+                            ? 'bg-emerald-700 text-white border-emerald-600'
+                            : 'bg-slate-800 text-slate-400 border-slate-700 hover:border-slate-500';
+                        return `<button type="button" onclick="toggleCantorMusica(${idx},'${nome.replace(/'/g, "\\'")}')" class="px-2 py-0.5 rounded-full text-xs border transition ${cls}">${ativo ? '✓ ' : ''}${nome}</button>`;
+                    }).join('');
+
+                return `
+                    <div class="bg-slate-900 border border-slate-700 px-3 py-2 rounded-lg space-y-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm text-white font-medium truncate">${m.nome}</p>
+                                <p class="text-xs text-emerald-300">${m.tom} ${m.variacao ? '('+m.variacao+')' : ''}</p>
+                            </div>
+                            <div class="flex gap-1 shrink-0">
+                                <button onclick="moverMusica(${idx}, -1)" class="text-slate-400 hover:text-white px-1.5 py-1 rounded text-xs">▲</button>
+                                <button onclick="moverMusica(${idx}, 1)" class="text-slate-400 hover:text-white px-1.5 py-1 rounded text-xs">▼</button>
+                                <button onclick="removerMusica(${idx})" class="text-red-400 hover:text-red-300 px-1.5 py-1 rounded text-xs">✕</button>
+                            </div>
+                        </div>
+                        ${cantoresCultoAtual.length > 0 ? `
+                        <div class="flex flex-wrap gap-1 items-center">
+                            <span class="text-xs text-slate-500 mr-1">🎤</span>
+                            ${cantoresChips}
+                        </div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleCantorMusica(idxMusica, nome) {
+            const cantores = musicasCultoAtual[idxMusica].cantores || [];
+            const idx = cantores.indexOf(nome);
+            if (idx === -1) cantores.push(nome);
+            else cantores.splice(idx, 1);
+            musicasCultoAtual[idxMusica].cantores = cantores;
+            renderizarMusicasCulto();
+        }
+
+        function moverMusica(idx, direcao) {
+            const novo = idx + direcao;
+            if (novo < 0 || novo >= musicasCultoAtual.length) return;
+            [musicasCultoAtual[idx], musicasCultoAtual[novo]] = [musicasCultoAtual[novo], musicasCultoAtual[idx]];
+            renderizarMusicasCulto();
+        }
+
+        function removerMusica(idx) {
+            musicasCultoAtual.splice(idx, 1);
+            renderizarMusicasCulto();
+        }
+
+        // ===================== ADMIN: BANCO DE MÚSICAS =====================
+
+        function abrirSeletorMusica() {
+            const seletor = document.getElementById('seletor-musica');
+            seletor.classList.toggle('hidden');
+            document.getElementById('busca-banco').value = '';
+            filtrarBanco();
+        }
+
+        function filtrarBanco() {
+            const termo = document.getElementById('busca-banco').value.toLowerCase();
+            const banco = dadosGlobais.banco;
+            const container = document.getElementById('resultado-banco');
+
+            const filtradas = banco.slice(1).filter(row => {
+                const nome = row[0] ? row[0].toString().toLowerCase() : '';
+                return nome && nome.includes(termo);
+            });
+
+            if (filtradas.length === 0) {
+                container.innerHTML = '<p class="text-slate-500 text-xs px-2">Nenhuma música encontrada.</p>';
+                return;
+            }
+
+            container.innerHTML = filtradas.slice(0, 50).map(row => {
+                const nome = row[0] || '';
+                const tom = row[1] || '';
+                const variacao = row[2] || 'Original';
+                const vs = row[3] || '';
+                const yt = row[4] || '';
+                return `
+                    <button onclick="adicionarMusicaDoBanco('${nome.toString().replace(/'/g, "\\'")}','${tom.toString().replace(/'/g, "\\'")}','${variacao.toString().replace(/'/g, "\\'")}','${vs.toString().replace(/'/g, "\\'")}','${yt.toString().replace(/'/g, "\\'")}')"
+                        class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-700 transition flex items-center justify-between gap-2">
+                        <span class="text-sm text-white truncate">${nome}</span>
+                        <span class="text-xs text-emerald-300 shrink-0">${tom} (${variacao})</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function adicionarMusicaDoBanco(nome, tom, variacao, vs, yt) {
+            if (musicasCultoAtual.find(m => m.nome === nome)) {
+                alert(`"${nome}" já está na playlist.`);
+                return;
+            }
+            musicasCultoAtual.push({ nome, tom, variacao, vs, yt, cantores: [] });
+            renderizarMusicasCulto();
+            document.getElementById('seletor-musica').classList.add('hidden');
+        }
+
+        // ===================== ADMIN: SALVAR =====================
+
+        async function salvarCulto() {
+            const data = document.getElementById('culto-data').value.trim();
+            const tipo = document.getElementById('culto-tipo').value;
+            const emMontagem = document.getElementById('culto-em-montagem').checked;
+            const oculto = document.getElementById('culto-oculto').checked;
+
+            if (!data) { alert('Preencha a data do culto.'); return; }
+
+            const titulo = `${data} - CULTO DE ${tipo}${emMontagem ? ' - EM MONTAGEM' : ''}${oculto ? ' - OCULTO' : ''}`;
+
+            escalaInstrumentos = {
+                violao: document.getElementById('escala-violao').value,
+                bateria: document.getElementById('escala-bateria').value,
+                teclado: document.getElementById('escala-teclado').value
+            };
+
+            const btn = document.getElementById('btn-salvar-culto');
+            btn.textContent = 'Salvando...';
+            btn.disabled = true;
+
+            const payload = {
+                acao: 'salvarCulto',
+                titulo,
+                instrumentos: escalaInstrumentos,   // col F (JSON)
+                cantoresCulto: cantoresCultoAtual,   // col G
+                musicas: musicasCultoAtual,           // cada uma com .cantores em col G da linha
+                editandoIndex: cultoEditandoIndex
+            };
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST', mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                document.getElementById('status-salvar-culto').classList.remove('hidden');
+                btn.textContent = 'Salvar na Planilha';
+                btn.disabled = false;
+                await carregarDados();
+            } catch (err) {
+                document.getElementById('erro-salvar-culto').classList.remove('hidden');
+                btn.textContent = 'Salvar na Planilha';
+                btn.disabled = false;
+            }
+        }
+
+        // ===================== SITE PRINCIPAL =====================
+
+        function mudarAba(aba) {
+            const secoes = { cultos: 'secao-cultos', repertorio: 'secao-repertorio', novas: 'secao-novas' };
+            const botoes = { cultos: 'btn-cultos', repertorio: 'btn-repertorio', novas: 'btn-novas' };
+            const ativo = "px-5 py-2.5 rounded-xl font-medium text-sm transition bg-emerald-600 text-white shadow-lg";
+            const inativo = "px-5 py-2.5 rounded-xl font-medium text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700";
+
+            Object.keys(secoes).forEach(key => {
+                document.getElementById(secoes[key]).classList.toggle('hidden', key !== aba);
+                document.getElementById(botoes[key]).className = key === aba ? ativo : inativo;
+            });
+        }
+
+        function extrairIdDrive(url) {
+            if (!url) return '';
+            const m1 = url.match(/\/d\/([a-zA-Z0-9_-]+)/); if (m1) return m1[1];
+            const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/); if (m2) return m2[1];
+            return '';
+        }
+
+        function extrairIdYoutube(url) {
+            if (!url) return '';
+            const m1 = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/); if (m1) return m1[1];
+            const m2 = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/); if (m2) return m2[1];
+            return '';
+        }
+
+        function obterLinkYoutube(ytDado, nomeMusica) {
+            if (!ytDado) return '';
+            if (ytDado.startsWith('http')) return ytDado;
+            return `https://www.youtube.com/results?search_query=${encodeURIComponent(ytDado || nomeMusica)}`;
+        }
+
+        function renderizarCultos(rows) {
+            const container = document.getElementById('secao-cultos');
+            container.innerHTML = '';
+
+            let blocoAtual = null;
+            let blocoEmMontagem = false;
+            let blocoOculto = false;
+            let escaladosInfo = null; // { instrumentos, cantores }
+            let htmlCultos = '';
+            let contadorCard = 0;
+            let contadorBloco = 0;
+
+            for (let i = 0; i < rows.length; i++) {
+                const linha = rows[i];
+                const textoPrimeiraColuna = linha[0] ? linha[0].toString() : '';
+
+                if (textoPrimeiraColuna.includes("CULTO DE")) {
+                    if (blocoAtual && !blocoOculto) htmlCultos += `</div></div>`;
+
+                    contadorBloco++;
+                    const idPlaylist = `playlist-culto-${contadorBloco}`;
+                    const idSeta = `seta-culto-${contadorBloco}`;
+                    blocoAtual = textoPrimeiraColuna;
+                    blocoEmMontagem = blocoAtual.toUpperCase().includes('EM MONTAGEM');
+                    blocoOculto = blocoAtual.toUpperCase().includes('OCULTO');
+
+                    // Lê instrumentos (col F = JSON) e cantores do culto (col G)
+                    let instrObj = {};
+                    try { instrObj = linha[5] ? JSON.parse(linha[5].toString()) : {}; } catch(e) {}
+                    const cantoresCulto = linha[6] ? linha[6].toString().trim() : '';
+
+                    if (blocoOculto) continue;
+
+                    const corHeader = blocoEmMontagem
+                        ? 'bg-red-900/60 hover:bg-red-900/80 border-b border-red-700/50'
+                        : 'bg-emerald-900/60 hover:bg-emerald-900/80 border-b border-emerald-700/50';
+                    const corTexto = blocoEmMontagem ? 'text-red-300' : 'text-emerald-300';
+
+                    // Monta linha de escala de instrumentos + cantores
+                    const partsEscala = [];
+                    if (instrObj.violao) partsEscala.push(`🎸 ${instrObj.violao}`);
+                    if (instrObj.bateria) partsEscala.push(`🥁 ${instrObj.bateria}`);
+                    if (instrObj.teclado) partsEscala.push(`🎹 ${instrObj.teclado}`);
+                    const linhaInstrumentos = partsEscala.length > 0
+                        ? `<div class="px-4 py-1.5 text-xs text-slate-300 bg-slate-900/40 border-b border-slate-700/30 flex flex-wrap gap-3">${partsEscala.join('<span class="text-slate-600">|</span>')}</div>`
+                        : '';
+                    const linhaCantores = cantoresCulto
+                        ? `<div class="px-4 py-1.5 text-xs bg-slate-900/40 border-b border-slate-700/30"><span class="text-slate-400">🎤 Cantores: </span><span class="text-emerald-300 font-medium">${cantoresCulto}</span></div>`
+                        : '';
+
+                    htmlCultos += `
+                        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl overflow-hidden shadow-md mb-3">
+                            <button onclick="toggleCultoBloco('${idPlaylist}', '${idSeta}')" class="w-full flex items-center justify-between ${corHeader} px-4 py-2.5 transition text-left">
+                                <h2 class="font-bold ${corTexto} text-sm uppercase tracking-wider">${blocoAtual.replace(/ - OCULTO/i,'').replace(/ - EM MONTAGEM/i,'').trim()}</h2>
+                                <span id="${idSeta}" class="${corTexto} text-xs">▼</span>
+                            </button>
+                            ${linhaInstrumentos}
+                            ${linhaCantores}
+                            <div id="${idPlaylist}" class="hidden divide-y divide-slate-700/50">
+                    `;
+
+                    if (blocoEmMontagem) {
+                        htmlCultos += `
+                            <div class="p-5 text-center space-y-3">
+                                <p class="text-red-400 text-sm font-medium">🚧 Incompleto — playlist em montagem</p>
+                                <p class="text-slate-400 text-xs">Envie sugestões de músicas para esse culto:</p>
+                                <div class="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+                                    <input type="text" id="sugestao-autor-${contadorBloco}" placeholder="Seu nome" class="sm:w-1/3 bg-slate-900 border border-slate-700 px-3 py-2 rounded text-sm text-white focus:outline-none focus:border-red-500">
+                                    <input type="text" id="sugestao-texto-${contadorBloco}" placeholder="Nome da música sugerida" class="sm:w-2/3 bg-slate-900 border border-slate-700 px-3 py-2 rounded text-sm text-white focus:outline-none focus:border-red-500">
+                                </div>
+                                <button onclick="enviarComentario('${blocoAtual.replace(/'/g,"\\'")}','sugestao-autor-${contadorBloco}','sugestao-texto-${contadorBloco}','sugestao-status-${contadorBloco}','Sugestão para Culto')" class="bg-red-700 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-medium">Enviar sugestão</button>
+                                <p id="sugestao-status-${contadorBloco}" class="text-xs text-emerald-400 hidden">Sugestão enviada!</p>
+                            </div>
+                        `;
+                    }
+                } else if (blocoAtual && !blocoOculto && textoPrimeiraColuna.trim() !== '' && !blocoEmMontagem) {
+                    const musica = linha[0];
+                    const tom = linha[1] || '';
+                    const variacao = linha[2] || '';
+                    const vsCelular = linha[3] || '';
+                    const ytDado = linha[4] || '';
+                    const cantoresMusica = linha[6] ? linha[6].toString().trim() : '';
+
+                    const fileId = extrairIdDrive(vsCelular);
+                    const linkYoutubeFinal = obterLinkYoutube(ytDado, musica);
+                    contadorCard++;
+
+                    htmlCultos += `
+                        <div class="p-4 flex flex-col gap-2 hover:bg-slate-750 transition">
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                <div>
+                                    <h3 class="font-bold text-white text-base">${musica}</h3>
+                                    <div class="flex flex-wrap items-center gap-2 mt-1 text-xs text-slate-400">
+                                        <span class="bg-slate-700 px-2 py-0.5 rounded text-emerald-300 font-semibold">Tom: ${tom} ${variacao ? '('+variacao+')' : ''}</span>
+                                        ${cantoresMusica ? `<span class="text-slate-400">🎤 <span class="text-slate-300">${cantoresMusica}</span></span>` : ''}
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+                                    ${vsCelular ? `<button onclick="playDriveAudio('${musica.toString().replace(/'/g,"\\'")}','${fileId}','${vsCelular}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">▶ Ouvir VS</button>` : ''}
+                                    ${linkYoutubeFinal ? `<button onclick="playYoutubeAudio('${musica.toString().replace(/'/g,"\\'")}','${linkYoutubeFinal}')" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">📺 YouTube</button>` : ''}
+                                    <button onclick="toggleComentario('culto-${contadorCard}')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition">💬 Pedir Ajuste</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="culto-${contadorCard}" class="hidden p-4 bg-slate-900/50 border-t border-slate-700/50 space-y-2">
+                            <div class="flex gap-2">
+                                <input type="text" id="autor-c-${contadorCard}" placeholder="Seu nome" class="w-1/3 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded text-xs text-white focus:outline-none focus:border-emerald-500">
+                                <input type="text" id="comentario-c-${contadorCard}" placeholder="Ex: Mudar tom para C..." class="w-2/3 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded text-xs text-white focus:outline-none focus:border-emerald-500">
+                                <button onclick="enviarComentario('${musica.toString().replace(/'/g,"\\'")}','autor-c-${contadorCard}','comentario-c-${contadorCard}','status-c-${contadorCard}','Ajuste de Tom')" class="bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1.5 rounded text-xs font-medium">Enviar</button>
+                            </div>
+                            <p id="status-c-${contadorCard}" class="text-xs text-emerald-400 hidden">Enviado com sucesso!</p>
+                        </div>
+                    `;
+                }
+            }
+
+            if (blocoAtual && !blocoOculto) htmlCultos += `</div></div>`;
+            container.innerHTML = htmlCultos || '<p class="text-center text-slate-500 py-10">Nenhum culto agendado encontrado na planilha.</p>';
+        }
+
+        function renderizarRepertorio(rows) {
+            const container = document.getElementById('musicList');
+            container.innerHTML = '';
+            for (let i = 1; i < rows.length; i++) {
+                const [musica, tom, variacaoTom, vsCelular, ytDado] = rows[i];
+                if (!musica) continue;
+                const fileId = extrairIdDrive(vsCelular);
+                const linkYoutubeFinal = obterLinkYoutube(ytDado, musica);
+                const cardId = `rep-${i}`;
+                const card = document.createElement('div');
+                card.className = "bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-3 hover:border-slate-600 transition";
+                card.innerHTML = `
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-lg text-white">${musica}</h3>
+                            <div class="flex items-center gap-2 mt-1 text-sm text-slate-400">
+                                <span class="bg-slate-700 px-2 py-0.5 rounded text-emerald-300 font-semibold">Tom: ${tom} (${variacaoTom || 'Original'})</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+                            ${vsCelular ? `<button onclick="playDriveAudio('${musica.toString().replace(/'/g,"\\'")}','${fileId}','${vsCelular}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition">▶ Ouvir VS</button>` : ''}
+                            ${linkYoutubeFinal ? `<button onclick="playYoutubeAudio('${musica.toString().replace(/'/g,"\\'")}','${linkYoutubeFinal}')" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">📺 YouTube</button>` : ''}
+                            <button onclick="toggleComentario('${cardId}')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-2 rounded-lg text-sm font-medium transition">💬 Pedir Ajuste / Tom</button>
+                        </div>
+                    </div>
+                    <div id="${cardId}" class="hidden pt-3 border-t border-slate-700 mt-3 space-y-2">
+                        <div class="flex gap-2">
+                            <input type="text" id="autor-${i}" placeholder="Seu nome" class="w-1/3 bg-slate-900 border border-slate-700 px-3 py-2 rounded text-sm text-white focus:outline-none focus:border-emerald-500">
+                            <input type="text" id="comentario-${i}" placeholder="Ex: Mudar tom para C..." class="w-2/3 bg-slate-900 border border-slate-700 px-3 py-2 rounded text-sm text-white focus:outline-none focus:border-emerald-500">
+                            <button onclick="enviarComentario('${musica.toString().replace(/'/g,"\\'")}','autor-${i}','comentario-${i}','status-${i}','Ajuste de Tom')" class="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded text-sm font-medium">Enviar</button>
+                        </div>
+                        <p id="status-${i}" class="text-xs text-emerald-400 hidden">Solicitação enviada com sucesso!</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            }
+        }
+
+        function renderizarMusicasNovas(rows) {
+            const container = document.getElementById('novasList');
+            container.innerHTML = '';
+            if (!rows || rows.length <= 1) {
+                container.innerHTML = '<p class="text-center text-slate-500 py-10">Nenhuma música nova cadastrada ainda.</p>';
+                return;
+            }
+            for (let i = 1; i < rows.length; i++) {
+                const [musica, tom, variacaoTom, vsCelular, ytDado] = rows[i];
+                if (!musica) continue;
+                const fileId = extrairIdDrive(vsCelular);
+                const linkYoutubeFinal = obterLinkYoutube(ytDado, musica);
+                const cardId = `nova-${i}`;
+                const card = document.createElement('div');
+                card.className = "bg-slate-800 p-4 rounded-xl border border-violet-700/30 space-y-3 hover:border-violet-600/50 transition";
+                card.innerHTML = `
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-lg text-white">${musica}</h3>
+                            <div class="flex items-center gap-2 mt-1 text-sm text-slate-400">
+                                <span class="bg-slate-700 px-2 py-0.5 rounded text-emerald-300 font-semibold">Tom: ${tom} (${variacaoTom || 'Original'})</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+                            ${vsCelular ? `<button onclick="playDriveAudio('${musica.toString().replace(/'/g,"\\'")}','${fileId}','${vsCelular}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition">▶ Ouvir VS</button>` : ''}
+                            ${linkYoutubeFinal ? `<button onclick="playYoutubeAudio('${musica.toString().replace(/'/g,"\\'")}','${linkYoutubeFinal}')" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">📺 YouTube</button>` : ''}
+                            <button onclick="toggleComentario('${cardId}')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-2 rounded-lg text-sm font-medium transition">💬 Pedir Ajuste / Tom</button>
+                        </div>
+                    </div>
+                    <div id="${cardId}" class="hidden pt-3 border-t border-slate-700 mt-3 space-y-2">
+                        <div class="flex gap-2">
+                            <input type="text" id="autor-n-${i}" placeholder="Seu nome" class="w-1/3 bg-slate-900 border border-slate-700 px-3 py-2 rounded text-sm text-white focus:outline-none focus:border-emerald-500">
+                            <input type="text" id="comentario-n-${i}" placeholder="Ex: Mudar tom para C..." class="w-2/3 bg-slate-900 border border-slate-700 px-3 py-2 rounded text-sm text-white focus:outline-none focus:border-emerald-500">
+                            <button onclick="enviarComentario('${musica.toString().replace(/'/g,"\\'")}','autor-n-${i}','comentario-n-${i}','status-n-${i}','Ajuste de Tom')" class="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded text-sm font-medium">Enviar</button>
+                        </div>
+                        <p id="status-n-${i}" class="text-xs text-emerald-400 hidden">Solicitação enviada com sucesso!</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            }
+        }
+
+        async function moverMusicasNovasParaBanco() {
+            const btn = document.getElementById('btn-mover-novas');
+            const statusDiv = document.getElementById('status-mover-novas');
+
+            if (dadosGlobais.novas.length <= 1) {
+                statusDiv.textContent = '⚠️ Nenhuma música nova encontrada na planilha.';
+                statusDiv.classList.remove('hidden');
+                return;
+            }
+
+            if (!confirm(`Mover ${dadosGlobais.novas.length - 1} música(s) da aba "Músicas Novas" para o Banco_Musicas e ordenar A-Z?\n\nEsta ação não pode ser desfeita.`)) return;
+
+            btn.textContent = 'Movendo...';
+            btn.disabled = true;
+            statusDiv.classList.add('hidden');
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST', mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ acao: 'moverMusicasNovas' })
+                });
+                statusDiv.textContent = '✅ Músicas movidas para o Banco com sucesso! A planilha foi ordenada A-Z. Recarregue o site para ver as mudanças.';
+                statusDiv.classList.remove('hidden');
+                btn.textContent = '🌟 Mover Músicas Novas → Banco';
+                btn.disabled = false;
+                await carregarDados();
+            } catch (err) {
+                statusDiv.textContent = '❌ Erro ao mover músicas. Tente novamente.';
+                statusDiv.classList.remove('hidden');
+                btn.textContent = '🌟 Mover Músicas Novas → Banco';
+                btn.disabled = false;
+            }
+        }
+
+        function filtrarMusicas() {
+            const termo = document.getElementById('searchInput').value.toLowerCase();
+            const rows = dadosGlobais.repertorio;
+            const container = document.getElementById('musicList');
+            container.innerHTML = '';
+            for (let i = 1; i < rows.length; i++) {
+                const [musica, tom, variacaoTom, vsCelular, ytDado] = rows[i];
+                if (!musica || !musica.toString().toLowerCase().includes(termo)) continue;
+                const fileId = extrairIdDrive(vsCelular);
+                const linkYoutubeFinal = obterLinkYoutube(ytDado, musica);
+                const cardId = `rep-filtrado-${i}`;
+                const card = document.createElement('div');
+                card.className = "bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-3 hover:border-slate-600 transition";
+                card.innerHTML = `
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-lg text-white">${musica}</h3>
+                            <div class="flex items-center gap-2 mt-1 text-sm text-slate-400">
+                                <span class="bg-slate-700 px-2 py-0.5 rounded text-emerald-300 font-semibold">Tom: ${tom} (${variacaoTom || 'Original'})</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+                            ${vsCelular ? `<button onclick="playDriveAudio('${musica.toString().replace(/'/g,"\\'")}','${fileId}','${vsCelular}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition">▶ Ouvir VS</button>` : ''}
+                            ${linkYoutubeFinal ? `<button onclick="playYoutubeAudio('${musica.toString().replace(/'/g,"\\'")}','${linkYoutubeFinal}')" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">📺 YouTube</button>` : ''}
+                            <button onclick="toggleComentario('${cardId}')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-2 rounded-lg text-sm font-medium transition">💬 Pedir Ajuste / Tom</button>
+                        </div>
+                    </div>
+                    <div id="${cardId}" class="hidden pt-3 border-t border-slate-700 mt-3 space-y-2">
+                        <div class="flex gap-2">
+                            <input type="text" id="autor-f-${i}" placeholder="Seu nome" class="w-1/3 bg-slate-900 border border-slate-700 px-3 py-2 rounded text-sm text-white focus:outline-none focus:border-emerald-500">
+                            <input type="text" id="comentario-f-${i}" placeholder="Ex: Mudar tom para C..." class="w-2/3 bg-slate-900 border border-slate-700 px-3 py-2 rounded text-sm text-white focus:outline-none focus:border-emerald-500">
+                            <button onclick="enviarComentario('${musica.toString().replace(/'/g,"\\'")}','autor-f-${i}','comentario-f-${i}','status-f-${i}','Ajuste de Tom')" class="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded text-sm font-medium">Enviar</button>
+                        </div>
+                        <p id="status-f-${i}" class="text-xs text-emerald-400 hidden">Solicitação enviada com sucesso!</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            }
+        }
+
+        function toggleCultoBloco(idPlaylist, idSeta) {
+            const playlist = document.getElementById(idPlaylist);
+            const seta = document.getElementById(idSeta);
+            playlist.classList.toggle('hidden');
+            seta.textContent = playlist.classList.contains('hidden') ? '▼' : '▲';
+        }
+
+        function toggleComentario(id) { document.getElementById(id).classList.toggle('hidden'); }
+
+        function fecharPlayer() {
+            document.getElementById('nowPlayingTitle').textContent = 'Nenhuma música selecionada';
+            document.getElementById('playerContainer').innerHTML = '<span class="text-xs text-slate-400">Clique em "▶ Ouvir VS" para carregar o player.</span>';
+        }
+
+        function playDriveAudio(title, fileId, rawValue) {
+            document.getElementById('nowPlayingTitle').textContent = `Tocando: ${title}`;
+            const pc = document.getElementById('playerContainer');
+            if (fileId) {
+                pc.innerHTML = `
+                    <div class="flex items-center gap-2 w-full">
+                        <div class="drive-player-wrapper flex-1">
+                            <iframe src="https://drive.google.com/file/d/${fileId}/preview" allow="autoplay"></iframe>
+                        </div>
+                        <button onclick="fecharPlayer()" class="shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-slate-700 hover:bg-red-600 text-slate-300 hover:text-white transition text-sm">✕</button>
+                    </div>`;
+            } else {
+                pc.innerHTML = '<span class="text-xs text-yellow-400">Insira o link do Drive na planilha.</span>';
+            }
+        }
+
+        function playYoutubeAudio(title, url) {
+            const videoId = extrairIdYoutube(url);
+            document.getElementById('nowPlayingTitle').textContent = `▶ ${title}`;
+            const pc = document.getElementById('playerContainer');
+            if (videoId) {
+                const linkYt = `https://www.youtube.com/watch?v=${videoId}`;
+                pc.innerHTML = `
+                    <div class="flex items-center gap-2 w-full">
+                        <div class="relative w-full rounded-lg overflow-hidden bg-black" style="height:180px;">
+                            <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0" allow="autoplay; encrypted-media" allowfullscreen style="width:100%;height:100%;border:0;"></iframe>
+                        </div>
+                        <div class="flex flex-col gap-2 shrink-0">
+                            <button onclick="abrirYoutubeEPausar('${linkYt}')" class="w-7 h-7 flex items-center justify-center rounded-full bg-red-700 hover:bg-red-500 text-white transition text-sm">↗</button>
+                            <button onclick="fecharPlayer()" class="w-7 h-7 flex items-center justify-center rounded-full bg-slate-700 hover:bg-red-600 text-slate-300 hover:text-white transition text-sm">✕</button>
+                        </div>
+                    </div>`;
+            } else {
+                pc.innerHTML = '<span class="text-xs text-yellow-400">Link do YouTube inválido.</span>';
+            }
+        }
+
+        function abrirYoutubeEPausar(url) {
+            document.getElementById('playerContainer').innerHTML = '<span class="text-xs text-slate-400">Abrindo no YouTube...</span>';
+            window.open(url, '_blank');
+        }
+
+        async function enviarComentario(musica, idAutor, idTexto, idStatus, categoria = 'Ajuste de Tom') {
+            const autor = document.getElementById(idAutor).value;
+            const texto = document.getElementById(idTexto).value;
+            const statusEl = document.getElementById(idStatus);
+            if (!autor || !texto) { alert('Preencha seu nome e a solicitação.'); return; }
+            statusEl.textContent = 'Enviando...';
+            statusEl.classList.remove('hidden');
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST', mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ musica, autor, texto, categoria })
+                });
+                statusEl.textContent = 'Enviado!';
+                document.getElementById(idTexto).value = '';
+                setTimeout(() => statusEl.classList.add('hidden'), 4000);
+            } catch (error) { statusEl.textContent = 'Erro ao enviar.'; }
+        }
+
+        carregarDados();
     </script>
 </body>
 </html>
